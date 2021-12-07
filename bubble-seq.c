@@ -12,10 +12,6 @@ void bubbleSort(int array[], int size) {
   }
 }
 
-void printArray(int array[], int size) {
-  
-}
-
 int main() {
   int data[] = {-2, 45, 0, 11, -9};
   int size = sizeof(data) / sizeof(data[0]);
