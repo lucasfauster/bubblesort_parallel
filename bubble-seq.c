@@ -23,18 +23,14 @@ int main() {
 	int * data = (int *)malloc(size*sizeof(int));
 
   for(int i = 0; i < size; i++)
-			data[i] = random() % 100;
+			data[i] = random() % 1000;
 
-
-	int start = clock();
+	double start = clock();
 
   bubbleSort(data, size);
  
-  int stop = clock();
+  double stop = clock();
 
-  printf("array size: %d; %f secs \n", size, (stop-start)/CLOCKS_PER_SEC);
-  for (int i = 0; i < size; ++i) {
-    printf("%d  ", data[i]);
-  }
+  printf("array size: %i; %f secs \n", size, (stop-start)/CLOCKS_PER_SEC);
   printf("\n");
 }

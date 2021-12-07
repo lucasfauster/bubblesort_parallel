@@ -88,7 +88,7 @@ void main(int argc, char **argv){
 		data = (int *)malloc((vetSize+numProcs-rest)*sizeof(int));
 
         for(i = 0; i < vetSize; i++)
-			data[i] = random() % 100;
+			data[i] = random() % 1000;
 
 		// for(i=0;i<vetSize;i++)
 		// 	data[i] = vet[i];
@@ -138,9 +138,9 @@ void main(int argc, char **argv){
 		stopT = clock();
 		printf("array size: %d; %d processors; %f secs\n",vetSize,numProcs,(stopT-startT)/CLOCKS_PER_SEC);
 
-		for(i=0;i<chunkSize;i++) 
-            if(chunk[i] != __INT_MAX__) printf(" %d;",chunk[i]);
-  		printf("\n");
+		// for(i=0;i<chunkSize;i++) 
+        //     if(chunk[i] != __INT_MAX__) printf(" %d;",chunk[i]);
+  		// printf("\n");
 	}
 	MPI_Finalize();
 }
