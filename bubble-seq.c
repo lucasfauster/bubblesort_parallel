@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 void bubbleSort(int array[], int size) {
   for (int step = 0; step < size - 1; ++step) {
@@ -13,11 +15,24 @@ void bubbleSort(int array[], int size) {
 }
 
 int main() {
-  int data[] = {-2, 45, 0, 11, -9};
-  int size = sizeof(data) / sizeof(data[0]);
+  int size;
+
+  printf("size of the array: ");
+	scanf("%i", &size);
+
+	int * data = (int *)malloc(size*sizeof(int));
+
+  for(int i = 0; i < size; i++)
+			data[i] = random() % 100;
+
+
+	int start = clock();
 
   bubbleSort(data, size);
  
+  int stop = clock();
+
+  printf("array size: %d; %f secs \n", size, (stop-start)/CLOCKS_PER_SEC);
   for (int i = 0; i < size; ++i) {
     printf("%d  ", data[i]);
   }
