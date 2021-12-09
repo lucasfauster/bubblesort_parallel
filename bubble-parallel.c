@@ -70,11 +70,11 @@ void main(int argc, char **argv){
 	int i;  
 	int step;
     int rest;
-	MPI_Status status;
+	MPI_Status status; // status sobre o envio de informações entre processos ( fonte, tipo de dados, erros)
 
-	MPI_Init(&argc,&argv);
-	MPI_Comm_rank(MPI_COMM_WORLD,&id);
-	MPI_Comm_size(MPI_COMM_WORLD,&numProcs);
+	MPI_Init(&argc,&argv); // inicializa o ambiente de comunicação
+	MPI_Comm_rank(MPI_COMM_WORLD,&id); // determina o id do processo no comunicador
+	MPI_Comm_size(MPI_COMM_WORLD,&numProcs); // determina o numero de processos no comunicador
 
 	if(id == 0){
         // int vet[] = {-2, 45, 0, 11, -9, 10, 23};
@@ -102,7 +102,7 @@ void main(int argc, char **argv){
         
         MPI_Bcast(&chunkSize,1,MPI_INT,0,MPI_COMM_WORLD); //comunica do processo principal para todos os processos o tamanho de uma parte do array
         chunk = (int *)malloc(chunkSize*sizeof(int));
-        MPI_Scatter(data,chunkSize,MPI_INT,chunk,chunkSize,MPI_INT,0,MPI_COMM_WORLD); //comunica de cada processo para todos os processos o array principal e o array em pedaço
+        MPI_Scatter(data,chunkSize,MPI_INT,chunk,chunkSize,MPI_INT,0,MPI_COMM_WORLD); // divide o array principal em pedaços pada cada processo
 
         bubblesort(chunk,chunkSize);
     }else{
@@ -117,8 +117,8 @@ void main(int argc, char **argv){
 	while(step < numProcs){
 		if(id % (2 * step) != 0){
 			int destinationId = id-step;
-			MPI_Send(&chunkSize,1,MPI_INT,destinationId,0,MPI_COMM_WORLD); //envia o tamanho do pedaço do array ordenado para o processo destinatário
-			MPI_Send(chunk,chunkSize,MPI_INT,destinationId,0,MPI_COMM_WORLD); //envia os valores do pedaço do array ordenado para o processo destinatário
+			MPI_Send(&chunkSize,1,MPI_INT,destinationId,0,MPI_COMM_WORLD); // envia o tamanho do pedaço do array ordenado para o processo destinatário
+			MPI_Send(chunk,chunkSize,MPI_INT,destinationId,0,MPI_COMM_WORLD); // envia os valores do pedaço do array ordenado para o processo destinatário
 			break;
 		}
 
