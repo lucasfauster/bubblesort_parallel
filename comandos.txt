@@ -1,0 +1,5 @@
+mpicc -o teste bubble-parallel.c 
+
+mpirun -n 4 teste
+
+mpirun -n 12 --oversubscribe teste
