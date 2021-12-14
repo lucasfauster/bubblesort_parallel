@@ -108,21 +108,21 @@ void main(int argc, char **argv){
     }else{
         MPI_Bcast(&chunkSize,1,MPI_INT,0,MPI_COMM_WORLD);
         chunk = (int *)malloc(chunkSize*sizeof(int));
-        MPI_Scatter(NULL,0,MPI_PROC_NULL,chunk,chunkSize,MPI_INT,0,MPI_COMM_WORLD); // aqui pode ser null pois é necessário ser feito apenas pelo processo principal
+        MPI_Scatter(NULL,0,MPI_PROC_NULL,chunk,chunkSize,MPI_INT,0,MPI_COMM_WORLD); // aqui pode ser null pois é necessário ser feito apenas uma vez pelo processo principal
 
         bubblesort(chunk,chunkSize);
     }
 
 	step = 1;
 	while(step < numProcs){
-		if(id % (2 * step) != 0){
+		if(id % (2 * step) != 0){ // id 0 nunca entra nesse if, apenas ids ímpares no primeiro step e ids pares nos steps > 1
 			int destinationId = id-step;
 			MPI_Send(&chunkSize,1,MPI_INT,destinationId,0,MPI_COMM_WORLD); // envia o tamanho do pedaço do array ordenado para o processo destinatário
 			MPI_Send(chunk,chunkSize,MPI_INT,destinationId,0,MPI_COMM_WORLD); // envia os valores do pedaço do array ordenado para o processo destinatário
 			break;
 		}
 
-        if(id + step < numProcs){
+        if(id + step < numProcs){ // id 0 sempre entra nesse if e ids pares esperam receber dos ids impares no primeiro step
             MPI_Recv(&chunkAuxSize,1,MPI_INT,id+step,0,MPI_COMM_WORLD,&status); // espera receber o tamanho do pedaço do array ordenado do processo de origem
             chunkAux = (int *)malloc(chunkAuxSize*sizeof(int));
 
