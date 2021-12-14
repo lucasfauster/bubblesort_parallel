@@ -81,6 +81,7 @@ void main(int argc, char **argv){
         // vetSize = sizeof(vet) / sizeof(vet[0]);
 
 		printf("size of the array: ");
+		fflush(stdout);
 		scanf("%i", &vetSize);
 		chunkSize = vetSize/numProcs;
 		rest = vetSize%numProcs;
@@ -106,41 +107,57 @@ void main(int argc, char **argv){
 
         bubblesort(chunk,chunkSize);
     }else{
-        MPI_Bcast(&chunkSize,1,MPI_INT,0,MPI_COMM_WORLD);
+        MPI_Bcast(&chunkSize,1,MPI_INT,0,MPI_COMM_WORLD); // processos subordinados recebem o tamanho do array do processo principal
         chunk = (int *)malloc(chunkSize*sizeof(int));
-        MPI_Scatter(NULL,0,MPI_PROC_NULL,chunk,chunkSize,MPI_INT,0,MPI_COMM_WORLD); // aqui pode ser null pois é necessário ser feito apenas uma vez pelo processo principal
+        MPI_Scatter(NULL,0,NULL,chunk,chunkSize,MPI_INT,0,MPI_COMM_WORLD); // processos subordinados recebem o array dividido pelo processo principal
 
         bubblesort(chunk,chunkSize);
     }
 
-	step = 1;
-	while(step < numProcs){
-		if(id % (2 * step) != 0){ // id 0 nunca entra nesse if, apenas ids ímpares no primeiro step e ids pares nos steps > 1
-			int destinationId = id-step;
-			MPI_Send(&chunkSize,1,MPI_INT,destinationId,0,MPI_COMM_WORLD); // envia o tamanho do pedaço do array ordenado para o processo destinatário
-			MPI_Send(chunk,chunkSize,MPI_INT,destinationId,0,MPI_COMM_WORLD); // envia os valores do pedaço do array ordenado para o processo destinatário
-			break;
+	// step = 1;
+	// while(step < numProcs){
+	// 	if(id % (2 * step) != 0){ // id 0 nunca entra nesse if, apenas ids ímpares no primeiro step e ids pares nos steps > 1
+	// 		int destinationId = id-step;
+	// 		MPI_Send(&chunkSize,1,MPI_INT,destinationId,0,MPI_COMM_WORLD); // envia o tamanho do pedaço do array ordenado para o processo destinatário
+	// 		MPI_Send(chunk,chunkSize,MPI_INT,destinationId,0,MPI_COMM_WORLD); // envia os valores do pedaço do array ordenado para o processo destinatário
+	// 		break;
+	// 	}
+
+    //     if(id + step < numProcs){ // id 0 sempre entra nesse if e ids pares esperam receber dos ids impares no primeiro step
+    //         MPI_Recv(&chunkAuxSize,1,MPI_INT,id+step,0,MPI_COMM_WORLD,&status); // espera receber o tamanho do pedaço do array ordenado do processo de origem
+    //         chunkAux = (int *)malloc(chunkAuxSize*sizeof(int));
+
+    //         MPI_Recv(chunkAux,chunkAuxSize,MPI_INT,id+step,0,MPI_COMM_WORLD,&status); // espera receber os valores do pedaço do array ordenado do processo de origem
+    //         chunk = merge(chunk,chunkSize,chunkAux,chunkAuxSize); // junta os pedaços do array ordenado no array principal
+    //         chunkSize = chunkSize+chunkAuxSize;
+    //     } 
+
+    //     step = step*2;
+	// }
+
+	int chunkSizeMain = chunkSize;
+
+	if (id != 0) {
+		MPI_Send(chunk,chunkSize,MPI_INT,0,0,MPI_COMM_WORLD);
+	} else {
+		chunkAux = (int *)malloc(chunkSize*sizeof(int));
+		
+		for(int i = 1; i < numProcs; i++){
+			MPI_Recv(chunkAux,chunkSize,MPI_INT,i,0,MPI_COMM_WORLD,&status);
+			chunk = merge(chunk,chunkSizeMain,chunkAux,chunkSize);
+        	chunkSizeMain = chunkSize+chunkSizeMain;
 		}
-
-        if(id + step < numProcs){ // id 0 sempre entra nesse if e ids pares esperam receber dos ids impares no primeiro step
-            MPI_Recv(&chunkAuxSize,1,MPI_INT,id+step,0,MPI_COMM_WORLD,&status); // espera receber o tamanho do pedaço do array ordenado do processo de origem
-            chunkAux = (int *)malloc(chunkAuxSize*sizeof(int));
-
-            MPI_Recv(chunkAux,chunkAuxSize,MPI_INT,id+step,0,MPI_COMM_WORLD,&status); // espera receber os valores do pedaço do array ordenado do processo de origem
-            chunk = merge(chunk,chunkSize,chunkAux,chunkAuxSize); // junta os pedaços do array ordenado no array principal
-            chunkSize = chunkSize+chunkAuxSize;
-        } 
-
-        step = step*2;
 	}
 
 	if(id==0){
 		stopT = clock();
-		printf("array size: %d; %d processors; %f secs\n",vetSize,numProcs,(stopT-startT)/CLOCKS_PER_SEC);
 
-		// for(i=0;i<chunkSize;i++) 
-        //     if(chunk[i] != __INT_MAX__) printf(" %d;",chunk[i]);
-  		// printf("\n");
+		for(i=0;i<chunkSizeMain;i++) 
+            if(chunk[i] != __INT_MAX__) printf(" %d;",chunk[i]);
+
+  		printf("\n");
+
+		printf("array size: %d; %d processors; %f secs\n",vetSize,numProcs,(stopT-startT)/CLOCKS_PER_SEC);
 	}
 	MPI_Finalize();
 }
