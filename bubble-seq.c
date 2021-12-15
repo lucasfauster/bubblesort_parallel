@@ -22,8 +22,8 @@ int main() {
 
 	int * data = (int *)malloc(size*sizeof(int));
 
-  for(int i = 0; i < size; i++)
-			data[i] = random() % 1000;
+  for(int i = size; i > 0; i--)
+			data[i] = i;
 
 	double start = clock();
 
@@ -31,6 +31,9 @@ int main() {
  
   double stop = clock();
 
-  printf("array size: %i; %f secs \n", size, (stop-start)/CLOCKS_PER_SEC);
+  for(int i=0;i<size;i++) 
+      printf(" %d;",data[i]);
+
   printf("\n");
+  printf("array size: %i; %f secs \n", size, (stop-start)/CLOCKS_PER_SEC);
 }
